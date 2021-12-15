@@ -1,5 +1,7 @@
 # Django To Do List in React
 
+1. Original tutorial- https://www.digitalocean.com/community/tutorials/build-a-to-do-application-using-django-and-react
+
 ## Local Setup
 
 1. Clone the repo.
