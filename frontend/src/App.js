@@ -77,7 +77,7 @@ function App() {
       <div className="nav nav-tabs">
         <span
           onClick={() => setDisplayCompleted(true)}
-          className={displayCompleted ? "nav-link" : "nav-link"}
+          className={displayCompleted ? "nav-link active" : "nav-link"}
         >
           Complete
         </span>
@@ -91,44 +91,42 @@ function App() {
     );
   };
 
-  // const renderItems = () => {
-  //   const { viewCompleted } = this.state;
-  //   const newItems = this.state.todoList.filter(
-  //     (item) => item.completed === viewCompleted
-  //   );
-  //
-  //   return newItems.map((item) => (
-  //     <li
-  //       key={item.id}
-  //       className="list-group-item d-flex justify-content-between align-items-center"
-  //     >
-  //       <span
-  //         className={`todo-title mr-2 ${
-  //           this.state.viewCompleted ? "completed-todo" : ""
-  //         }`}
-  //         title={item.description}
-  //       >
-  //         {item.title}
-  //       </span>
-  //       <span>
-  //         <button
-  //           className="btn btn-secondary mr-2"
-  //           onClick={() => this.editItem(item)}
-  //         >
-  //           Edit
-  //         </button>
-  //         <button
-  //           className="btn btn-danger"
-  //           onClick={() => this.handleDelete(item)}
-  //         >
-  //           Delete
-  //         </button>
-  //       </span>
-  //     </li>
-  //   ));
-  // };
+  const renderItems = () => {
+    const itemList = todoList.filter(
+      (item) => item.completed === displayCompleted
+    );
 
-  console.log("todoList", todoList);
+    return itemList.map((item) => (
+      <li
+        key={item.id}
+        className="list-group-item d-flex justify-content-between align-items-center"
+      >
+        <span
+          className={`todo-title mr-2 ${
+            displayCompleted ? "completed-todo" : ""
+          }`}
+          title={item.description}
+        >
+          {item.title}
+        </span>
+        <span>
+          <button
+            className="btn btn-secondary mr-2"
+            // onClick={() => this.editItem(item)}
+          >
+            Edit
+          </button>
+          <button
+            className="btn btn-danger"
+            // onClick={() => this.handleDelete(item)}
+          >
+            Delete
+          </button>
+        </span>
+      </li>
+    ));
+  };
+
   return (
     <main className="container">
       <h1 className="text-white text-uppercase text-center my-4">Todo app</h1>
@@ -142,9 +140,7 @@ function App() {
             </div>
             {renderTabList()}
             <ul className="list-group list-group-flush border-top-0">
-              {todoList.map((item) => (
-                <li key={item.id}>{item.title}</li>
-              ))}
+              {renderItems()}
             </ul>
           </div>
         </div>
