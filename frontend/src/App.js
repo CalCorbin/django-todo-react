@@ -27,26 +27,27 @@ function App() {
     };
   }, []);
 
-  // const toggle = () => {
-  //   this.setState({ modal: !this.state.modal });
-  // };
-  //
-  // const handleSubmit = (item) => {
-  //   this.toggle();
-  //
-  //   if (item.id) {
-  //     axios
-  //       .put(`/api/todos/${item.id}/`, item)
-  //       .then((res) => this.refreshList());
-  //     return;
-  //   }
-  //   axios.post("/api/todos/", item).then((res) => this.refreshList());
-  // };
-  //
+  const handleSubmit = async (item) => {
+    setModalOpen(false);
+
+    if (item.id) {
+      const response = await fetch(`/api/todos/${item.id}/`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(item),
+      });
+
+      return response.json();
+    }
+    // axios.post("/api/todos/", item).then((res) => this.refreshList());
+  };
+
   // const handleDelete = (item) => {
   //   axios.delete(`/api/todos/${item.id}/`).then((res) => this.refreshList());
   // };
-  //
+
   const createItem = () => {
     console.log("createItem");
     // const item = { title: "", description: "", completed: false };
@@ -141,7 +142,11 @@ function App() {
         </div>
       </div>
       {modalOpen ? (
-        <Modal activeItem={activeItem} toggle={() => setModalOpen(false)} />
+        <Modal
+          activeItem={activeItem}
+          toggle={() => setModalOpen(false)}
+          onSave={handleSubmit}
+        />
       ) : null}
     </main>
   );
