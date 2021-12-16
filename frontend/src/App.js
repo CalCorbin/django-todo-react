@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
-// import Modal from "./components/Modal";
+import Modal from "./components/Modal";
 // import axios from "axios";
 
 function App() {
   const [todoList, setTodoList] = useState([]);
   const [displayCompleted, setDisplayCompleted] = useState(false);
-  // const [modalOpen, setModalOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [activeItem, setActiveItem] = useState();
 
   useEffect(() => {
     let mounted = true;
@@ -25,13 +26,6 @@ function App() {
       mounted = false;
     };
   }, []);
-
-  // const refreshList = () => {
-  //   axios
-  //     .get("/api/todos/")
-  //     .then((res) => this.setState({ todoList: res.data }))
-  //     .catch((err) => console.log(err));
-  // };
 
   // const toggle = () => {
   //   this.setState({ modal: !this.state.modal });
@@ -60,10 +54,11 @@ function App() {
     // this.setState({ activeItem: item, modal: !this.state.modal });
   };
 
-  // const editItem = (item) => {
-  //   this.setState({ activeItem: item, modal: !this.state.modal });
-  // };
-  //
+  const editItem = (item) => {
+    setActiveItem(item);
+    setModalOpen(true);
+  };
+
   // const toggleTabs = (status) => {
   //   // if (status) {
   //   // return this.setState({ viewCompleted: true });
@@ -112,7 +107,7 @@ function App() {
         <span>
           <button
             className="btn btn-secondary mr-2"
-            // onClick={() => this.editItem(item)}
+            onClick={() => editItem(item)}
           >
             Edit
           </button>
@@ -145,6 +140,9 @@ function App() {
           </div>
         </div>
       </div>
+      {modalOpen ? (
+        <Modal activeItem={activeItem} toggle={() => setModalOpen(false)} />
+      ) : null}
     </main>
   );
 }
