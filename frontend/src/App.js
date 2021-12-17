@@ -30,7 +30,7 @@ function App() {
     setModalOpen(false);
 
     if (item.id) {
-      const response = await fetch(`/api/todos/${item.id}/`, {
+      await fetch(`/api/todos/${item.id}/`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -38,10 +38,12 @@ function App() {
         body: JSON.stringify(item),
       });
 
-      return response.json();
+      return fetchData().then((data) => {
+        setTodoList(data);
+      });
     }
 
-    const response = await fetch('/api/todos/', {
+    await fetch('/api/todos/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
