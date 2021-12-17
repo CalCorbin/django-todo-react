@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import Modal from './components/Modal';
+import TaskModal from './components/TaskModal';
 
 const toDoApi = '/api/todos/';
 const headers = {
@@ -175,8 +175,9 @@ function App() {
         </div>
       </div>
       {modalOpen ? (
-        <Modal
+        <TaskModal
           activeItem={activeItem}
+          setActiveItem={setActiveItem}
           toggle={() => setModalOpen(false)}
           onSave={handleSubmit}
         />
