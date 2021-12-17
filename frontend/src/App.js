@@ -41,6 +41,14 @@ function App() {
 
       return response.json();
     }
+
+    const response = await fetch("/api/todos", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(item),
+    });
     // axios.post("/api/todos/", item).then((res) => this.refreshList());
   };
 
