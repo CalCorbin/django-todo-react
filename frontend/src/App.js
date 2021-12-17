@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import Modal from './components/Modal';
 
+const toDoApi = '/api/todos/';
+const headers = {
+  'Content-Type': 'application/json',
+};
+
 function App() {
   const [todoList, setTodoList] = useState([]);
   const [displayCompleted, setDisplayCompleted] = useState(false);
@@ -26,52 +31,64 @@ function App() {
     };
   }, []);
 
-  const handleSubmit = async (item) => {
+  const handleSubmit = (item) => {
     setModalOpen(false);
 
     if (item.id) {
-      await fetch(`/api/todos/${item.id}/`, {
+      fetch(`${toDoApi}${item.id}/`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify(item),
-      });
+      })
+        .then((res) => {
+          if (!res.ok) throw new Error('Network response was not OK');
+          fetchData().then((data) => {
+            setTodoList(data);
+          });
+        })
+        .catch((error) => {
+          console.error(
+            'There has been a problem with your PUT operation:',
+            error
+          );
+        });
 
-      return fetchData().then((data) => {
-        setTodoList(data);
-      });
+      return;
     }
 
-    await fetch('/api/todos/', {
+    fetch(toDoApi, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
       body: JSON.stringify(item),
-    });
-
-    fetchData().then((data) => {
-      setTodoList(data);
-    });
-  };
-
-  const handleDelete = (item) => {
-    fetch(`/api/todos/${item.id}/`, {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
     })
       .then((res) => {
-        if (!res.ok) {
-          throw new Error('Network response was not OK');
-        }
+        if (!res.ok) throw new Error('Network response was not OK');
         fetchData().then((data) => {
           setTodoList(data);
         });
       })
       .catch((error) => {
         console.error(
-          'There has been a problem with your fetch operation:',
+          'There has been a problem with your POST operation:',
+          error
+        );
+      });
+  };
+
+  const handleDelete = (item) => {
+    fetch(`${toDoApi}${item.id}/`, {
+      method: 'DELETE',
+      headers,
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error('Network response was not OK');
+        fetchData().then((data) => {
+          setTodoList(data);
+        });
+      })
+      .catch((error) => {
+        console.error(
+          'There has been a problem with your DELETE operation:',
           error
         );
       });
