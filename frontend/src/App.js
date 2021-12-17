@@ -56,9 +56,26 @@ function App() {
     });
   };
 
-  // const handleDelete = (item) => {
-  //   axios.delete(`/api/todos/${item.id}/`).then((res) => this.refreshList());
-  // };
+  const handleDelete = (item) => {
+    fetch(`/api/todos/${item.id}/`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+    })
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error('Network response was not OK');
+        }
+        fetchData().then((data) => {
+          setTodoList(data);
+        });
+      })
+      .catch((error) => {
+        console.error(
+          'There has been a problem with your fetch operation:',
+          error
+        );
+      });
+  };
 
   const addTask = () => {
     setModalOpen(true);
@@ -69,14 +86,6 @@ function App() {
     setActiveItem(item);
     setModalOpen(true);
   };
-
-  // const toggleTabs = (status) => {
-  //   // if (status) {
-  //   // return this.setState({ viewCompleted: true });
-  //   // }
-  //   // return this.setState({ viewCompleted: false });
-  //   return setDisplayCompleted(status);
-  // };
 
   const renderTabList = () => {
     return (
@@ -122,10 +131,7 @@ function App() {
           >
             Edit
           </button>
-          <button
-            className="btn btn-danger"
-            // onClick={() => this.handleDelete(item)}
-          >
+          <button className="btn btn-danger" onClick={() => handleDelete(item)}>
             Delete
           </button>
         </span>
