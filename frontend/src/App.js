@@ -1,83 +1,121 @@
-import React, { Component } from "react";
-import Modal from "./components/Modal";
-import axios from "axios";
+import React, { useState, useEffect } from 'react';
+import Modal from './components/Modal';
 
-class App extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      viewCompleted: false,
-      todoList: [],
-      modal: false,
-      activeItem: {
-        title: "",
-        description: "",
-        completed: false,
-      },
+const toDoApi = '/api/todos/';
+const headers = {
+  'Content-Type': 'application/json',
+};
+
+function App() {
+  const [todoList, setTodoList] = useState([]);
+  const [displayCompleted, setDisplayCompleted] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [activeItem, setActiveItem] = useState({});
+
+  const fetchData = async () => {
+    const response = await fetch('/api/todos/');
+    return response.json();
+  };
+
+  useEffect(() => {
+    let mounted = true;
+
+    fetchData().then((data) => {
+      if (!mounted) return;
+
+      setTodoList(data);
+    });
+
+    return () => {
+      mounted = false;
     };
-  }
+  }, []);
 
-  componentDidMount() {
-    this.refreshList();
-  }
-
-  refreshList = () => {
-    axios
-      .get("/api/todos/")
-      .then((res) => this.setState({ todoList: res.data }))
-      .catch((err) => console.log(err));
-  };
-
-  toggle = () => {
-    this.setState({ modal: !this.state.modal });
-  };
-
-  handleSubmit = (item) => {
-    this.toggle();
+  const handleSubmit = (item) => {
+    setModalOpen(false);
 
     if (item.id) {
-      axios
-        .put(`/api/todos/${item.id}/`, item)
-        .then((res) => this.refreshList());
+      fetch(`${toDoApi}${item.id}/`, {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify(item),
+      })
+        .then((res) => {
+          if (!res.ok) throw new Error('Network response was not OK');
+          fetchData().then((data) => {
+            setTodoList(data);
+          });
+        })
+        .catch((error) => {
+          console.error(
+            'There has been a problem with your PUT operation:',
+            error
+          );
+        });
+
       return;
     }
-    axios.post("/api/todos/", item).then((res) => this.refreshList());
+
+    fetch(toDoApi, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(item),
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error('Network response was not OK');
+        fetchData().then((data) => {
+          setTodoList(data);
+        });
+      })
+      .catch((error) => {
+        console.error(
+          'There has been a problem with your POST operation:',
+          error
+        );
+      });
   };
 
-  handleDelete = (item) => {
-    axios.delete(`/api/todos/${item.id}/`).then((res) => this.refreshList());
+  const handleDelete = (item) => {
+    fetch(`${toDoApi}${item.id}/`, {
+      method: 'DELETE',
+      headers,
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error('Network response was not OK');
+        fetchData().then((data) => {
+          setTodoList(data);
+        });
+      })
+      .catch((error) => {
+        console.error(
+          'There has been a problem with your DELETE operation:',
+          error
+        );
+      });
   };
 
-  createItem = () => {
-    const item = { title: "", description: "", completed: false };
-
-    this.setState({ activeItem: item, modal: !this.state.modal });
+  const addTask = () => {
+    setModalOpen(true);
+    setActiveItem({ title: '', description: '', completed: false });
   };
 
-  editItem = (item) => {
-    this.setState({ activeItem: item, modal: !this.state.modal });
+  const editItem = (item) => {
+    setActiveItem(item);
+    setModalOpen(true);
   };
 
-  displayCompleted = (status) => {
-    if (status) {
-      return this.setState({ viewCompleted: true });
-    }
-
-    return this.setState({ viewCompleted: false });
-  };
-
-  renderTabList = () => {
+  const renderTabList = () => {
     return (
       <div className="nav nav-tabs">
         <span
-          onClick={() => this.displayCompleted(true)}
-          className={this.state.viewCompleted ? "nav-link active" : "nav-link"}
+          onClick={() => setDisplayCompleted(true)}
+          className={displayCompleted ? 'nav-link active' : 'nav-link'}
         >
           Complete
         </span>
         <span
-          onClick={() => this.displayCompleted(false)}
-          className={this.state.viewCompleted ? "nav-link" : "nav-link active"}
+          onClick={() => setDisplayCompleted(false)}
+          className={displayCompleted ? 'nav-link' : 'nav-link active'}
         >
           Incomplete
         </span>
@@ -85,20 +123,19 @@ class App extends Component {
     );
   };
 
-  renderItems = () => {
-    const { viewCompleted } = this.state;
-    const newItems = this.state.todoList.filter(
-      (item) => item.completed === viewCompleted
+  const renderItems = () => {
+    const itemList = todoList.filter(
+      (item) => item.completed === displayCompleted
     );
 
-    return newItems.map((item) => (
+    return itemList.map((item) => (
       <li
         key={item.id}
         className="list-group-item d-flex justify-content-between align-items-center"
       >
         <span
           className={`todo-title mr-2 ${
-            this.state.viewCompleted ? "completed-todo" : ""
+            displayCompleted ? 'completed-todo' : ''
           }`}
           title={item.description}
         >
@@ -107,14 +144,11 @@ class App extends Component {
         <span>
           <button
             className="btn btn-secondary mr-2"
-            onClick={() => this.editItem(item)}
+            onClick={() => editItem(item)}
           >
             Edit
           </button>
-          <button
-            className="btn btn-danger"
-            onClick={() => this.handleDelete(item)}
-          >
+          <button className="btn btn-danger" onClick={() => handleDelete(item)}>
             Delete
           </button>
         </span>
@@ -122,35 +156,33 @@ class App extends Component {
     ));
   };
 
-  render() {
-    return (
-      <main className="container">
-        <h1 className="text-white text-uppercase text-center my-4">Todo app</h1>
-        <div className="row">
-          <div className="col-md-6 col-sm-10 mx-auto p-0">
-            <div className="card p-3">
-              <div className="mb-4">
-                <button className="btn btn-primary" onClick={this.createItem}>
-                  Add task
-                </button>
-              </div>
-              {this.renderTabList()}
-              <ul className="list-group list-group-flush border-top-0">
-                {this.renderItems()}
-              </ul>
+  return (
+    <main className="container">
+      <h1 className="text-white text-uppercase text-center my-4">Todo app</h1>
+      <div className="row">
+        <div className="col-md-6 col-sm-10 mx-auto p-0">
+          <div className="card p-3">
+            <div className="mb-4">
+              <button className="btn btn-primary" onClick={addTask}>
+                Add task
+              </button>
             </div>
+            {renderTabList()}
+            <ul className="list-group list-group-flush border-top-0">
+              {renderItems()}
+            </ul>
           </div>
         </div>
-        {this.state.modal ? (
-          <Modal
-            activeItem={this.state.activeItem}
-            toggle={this.toggle}
-            onSave={this.handleSubmit}
-          />
-        ) : null}
-      </main>
-    );
-  }
+      </div>
+      {modalOpen ? (
+        <Modal
+          activeItem={activeItem}
+          toggle={() => setModalOpen(false)}
+          onSave={handleSubmit}
+        />
+      ) : null}
+    </main>
+  );
 }
 
 export default App;
