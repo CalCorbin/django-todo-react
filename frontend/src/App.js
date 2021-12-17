@@ -1,20 +1,19 @@
-import React, { useState, useEffect } from "react";
-import Modal from "./components/Modal";
-// import axios from "axios";
+import React, { useState, useEffect } from 'react';
+import Modal from './components/Modal';
 
 function App() {
   const [todoList, setTodoList] = useState([]);
   const [displayCompleted, setDisplayCompleted] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
-  const [activeItem, setActiveItem] = useState();
+  const [activeItem, setActiveItem] = useState({});
+
+  const fetchData = async () => {
+    const response = await fetch('/api/todos/');
+    return response.json();
+  };
 
   useEffect(() => {
     let mounted = true;
-
-    const fetchData = async () => {
-      const response = await fetch("/api/todos/");
-      return response.json();
-    };
 
     fetchData().then((data) => {
       if (!mounted) return;
@@ -32,9 +31,9 @@ function App() {
 
     if (item.id) {
       const response = await fetch(`/api/todos/${item.id}/`, {
-        method: "PUT",
+        method: 'PUT',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(item),
       });
@@ -42,25 +41,26 @@ function App() {
       return response.json();
     }
 
-    const response = await fetch("/api/todos", {
-      method: "POST",
+    const response = await fetch('/api/todos/', {
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify(item),
     });
-    // axios.post("/api/todos/", item).then((res) => this.refreshList());
+
+    fetchData().then((data) => {
+      setTodoList(data);
+    });
   };
 
   // const handleDelete = (item) => {
   //   axios.delete(`/api/todos/${item.id}/`).then((res) => this.refreshList());
   // };
 
-  const createItem = () => {
-    console.log("createItem");
-    // const item = { title: "", description: "", completed: false };
-
-    // this.setState({ activeItem: item, modal: !this.state.modal });
+  const addTask = () => {
+    setModalOpen(true);
+    setActiveItem({ title: '', description: '', completed: false });
   };
 
   const editItem = (item) => {
@@ -81,13 +81,13 @@ function App() {
       <div className="nav nav-tabs">
         <span
           onClick={() => setDisplayCompleted(true)}
-          className={displayCompleted ? "nav-link active" : "nav-link"}
+          className={displayCompleted ? 'nav-link active' : 'nav-link'}
         >
           Complete
         </span>
         <span
           onClick={() => setDisplayCompleted(false)}
-          className={displayCompleted ? "nav-link" : "nav-link active"}
+          className={displayCompleted ? 'nav-link' : 'nav-link active'}
         >
           Incomplete
         </span>
@@ -107,7 +107,7 @@ function App() {
       >
         <span
           className={`todo-title mr-2 ${
-            displayCompleted ? "completed-todo" : ""
+            displayCompleted ? 'completed-todo' : ''
           }`}
           title={item.description}
         >
@@ -138,7 +138,7 @@ function App() {
         <div className="col-md-6 col-sm-10 mx-auto p-0">
           <div className="card p-3">
             <div className="mb-4">
-              <button className="btn btn-primary" onClick={createItem}>
+              <button className="btn btn-primary" onClick={addTask}>
                 Add task
               </button>
             </div>
